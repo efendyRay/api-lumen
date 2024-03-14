@@ -9,12 +9,49 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    // }
 
     public function index(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'search' => 'string|string|max:200|min:2|regex:/^[a-zA-Z0-9]+$/',
+            'skip' => 'numeric|max:10',
+            'take' => 'numeric|max:10',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $q                = $request->search;
+        $take             = $request->take;
+        $skip             = $request->skip;
+        
+        if ($q || ($take && $skip)){
+            $products = Product::when($q, function($query, $q) {
+                $query->where('name', 'like', '%'.$q.'%')
+                ->orWhere('code', 'like', '%'.$q.'%')
+                ->orWhere('price', 'like', '%'.$q.'%');
+            })->when($take, function($query, $take) {
+                $query->take($take);
+            })->when($skip, function($query, $skip) {
+                $query->skip($skip-1);
+            })->orderBy('created_at', 'ASC')->get();
+
+            return $this->return_success("Success Menampilkan Semua Product", $products, Response::HTTP_OK);
+        } else {
+            $products = Product::orderBy('created_at', 'ASC')->get();
+
+            return $this->return_success("Success Menampilkan Semua Product", $products, Response::HTTP_OK);
+        }
+
+    }
+
+    public function dashboard_product(Request $request)
     {
 
         $validator = Validator::make($request->all(), [

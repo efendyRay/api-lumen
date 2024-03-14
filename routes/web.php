@@ -18,19 +18,21 @@ $router->group(['prefix' => 'auth'], function() use ($router) {
     $router->post('register', 'AuthController@register');
 });
 
-$router->group(['prefix' => 'user', 'middleware' => ['role:admin|user']], function () use ($router) {
+$router->get('/dashboard_product', 'ProductController@dashboard_product');
+
+$router->group(['prefix' => 'user', 'middleware' => ['role:admin|user', 'auth']], function () use ($router) {
     $router->get('/index', 'UserController@index');
     $router->get('/detail/{id}', 'UserController@detail');
     $router->post('/store', 'UserController@store');
     $router->put('/update/{id}', 'UserController@update');
 });
 
-$router->group(['middleware' => 'role:admin'], function () use ($router) {
+$router->group(['middleware' => 'role:admin', 'auth'], function () use ($router) {
     $router->delete('user/delete/{id}', 'UserController@destroy');
     $router->delete('product/delete/{id}', 'ProductController@destroy');
 });
 
-$router->group(['prefix' => 'product', 'middleware' => ['role:admin|user']], function () use ($router) {
+$router->group(['prefix' => 'product', 'middleware' => ['role:admin|user', 'auth']], function () use ($router) {
     $router->get('/index', 'ProductController@index');
     $router->get('/detail/{id}', 'ProductController@detail');
     $router->post('/store', 'ProductController@store');
