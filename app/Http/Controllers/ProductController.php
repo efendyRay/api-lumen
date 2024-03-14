@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
 
@@ -67,6 +68,9 @@ class ProductController extends Controller
         $q                = $request->search;
         $take             = $request->take;
         $skip             = $request->skip;
+
+        $total_user = User::count();
+        $total_user_aktif = User::where('status', 'Aktif')->count();
         
         if ($q || ($take && $skip)){
             $products = Product::when($q, function($query, $q) {
@@ -79,11 +83,27 @@ class ProductController extends Controller
                 $query->skip($skip-1);
             })->orderBy('created_at', 'ASC')->get();
 
-            return $this->return_success("Success Menampilkan Semua Product", $products, Response::HTTP_OK);
+            $data = array (
+                'product' => $products,
+                'total_user' => $total_user,
+                'total_user_aktif' => $total_user_aktif,
+                'total_produk' => $products->count(),
+                'total_produk_aktif' => $products->where('status', 'Ready')->count(),
+            );
+
+            return $this->return_success("Success Menampilkan Semua Product", $data, Response::HTTP_OK);
         } else {
             $products = Product::orderBy('created_at', 'ASC')->get();
 
-            return $this->return_success("Success Menampilkan Semua Product", $products, Response::HTTP_OK);
+            $data = array (
+                'product' => $products,
+                'total_user' => $total_user,
+                'total_user_aktif' => $total_user_aktif,
+                'total_produk' => $products->count(),
+                'total_produk_aktif' => $products->where('status', 'Ready')->count(),
+            );
+
+            return $this->return_success("Success Menampilkan Semua Product", $data, Response::HTTP_OK);
         }
 
     }
