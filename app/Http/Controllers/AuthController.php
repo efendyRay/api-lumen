@@ -22,7 +22,7 @@ class AuthController extends Controller
             if (Hash::check($request->password, $user->password)) {
                 $token = $user->createToken('Lumen Password Grant Client')->accessToken;
 
-                return $this->return_success("Login successful", ["token" => $token], Response::HTTP_OK);
+                return $this->return_success("Login successful", ["user" => $user, "token" => $token], Response::HTTP_OK);
             } else {
                 return $this->return_mismatch("Password mismatch", Response::HTTP_UNPROCESSABLE_ENTITY);
             }
